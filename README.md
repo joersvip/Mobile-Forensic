@@ -40,6 +40,90 @@ Aplikasi ini beroperasi sepenuhnya secara lokal (**offline-first**) untuk menjam
 
 ---
 
+## ⚙️ Panduan Instalasi (Installation Guide)
+
+Ikuti langkah-langkah di bawah ini untuk memasang dan menjalankan aplikasi ini di lingkungan lokal Anda.
+
+### Prasyarat Sistem
+Pastikan perangkat Anda sudah terinstal perangkat lunak berikut:
+*   **Node.js** (Versi 18.x atau yang lebih baru direkomendasikan)
+*   **npm** (Bawaan dari instalasi Node.js) atau **yarn**
+
+### Langkah 1: Kloning atau Unduh Repositori
+Ekstrak berkas ZIP kode sumber atau lakukan kloning langsung menggunakan git:
+```bash
+git clone <url-repositori-anda>
+cd <nama-folder-aplikasi>
+```
+
+### Langkah 2: Instalasi Dependensi
+Jalankan perintah berikut untuk menginstal seluruh paket pustaka yang dibutuhkan:
+```bash
+npm install
+```
+
+### Langkah 3: Konfigurasi Variabel Lingkungan (Opsional)
+Salin berkas contoh konfigurasi lingkungan jika tersedia atau buat berkas `.env.local` pada direktori utama:
+```bash
+cp .env.example .env.local
+```
+*(Catatan: Aplikasi ini dirancang untuk bekerja secara offline tanpa ketergantungan server eksternal, sehingga konfigurasi API key bersifat opsional kecuali Anda ingin mengintegrasikannya dengan layanan cloud tambahan).*
+
+### Langkah 4: Jalankan Server Pengembangan
+Jalankan aplikasi di mode pengembangan (development mode) pada mesin lokal Anda:
+```bash
+npm run dev
+```
+Setelah perintah berhasil dijalankan, buka peramban Anda dan akses tautan berikut:
+**[http://localhost:3000](http://localhost:3000)**
+
+### Langkah 5: Build untuk Mode Produksi
+Jika ingin melakukan kompilasi aplikasi agar siap dijalankan secara optimal di lingkungan produksi:
+```bash
+npm run build
+npm start
+```
+
+---
+
+## 🚀 Panduan Penggunaan (Usage Guide)
+
+Untuk memanfaatkan kapabilitas penuh dari **Mobile Forensic Analysis Suite**, silakan ikuti alur skenario operasional berikut:
+
+### Sesi 1: Registrasi & Pendaftaran Wajah (Awal)
+1.  Saat pertama kali membuka aplikasi, Anda akan diarahkan ke halaman **Sistem Autentikasi Pengguna**.
+2.  Karena sistem beroperasi secara offline, Anda harus **mendaftarkan akun baru** terlebih dahulu dengan mengeklik tombol **Registrasi Akun Baru**.
+3.  Masukkan Username dan Password baru, lalu aktifkan Webcam perangkat untuk menangkap gambar wajah Anda sebagai kunci enkripsi biometrik lokal.
+4.  Setelah registrasi sukses, lakukan **Login** menggunakan kredensial yang baru saja Anda buat bersama pencocokan wajah langsung secara real-time.
+
+### Sesi 2: Menjaga Kredensial (Continuous Face Security)
+1.  Setelah berhasil login ke Dashboard, sistem pengawasan **Continuous Verifier (Anti-Intrusion)** akan aktif di pojok kiri bawah.
+2.  Modul ini akan memantau umpan kamera Anda setiap beberapa detik secara aman dan lokal.
+3.  Jika analis meninggalkan meja kerja, memalingkan wajah, atau jika ada orang asing yang masuk ke jangkauan kamera, sistem akan mendeteksi intrusi tersebut dan **mengunci antarmuka aplikasi secara otomatis dalam waktu 5 detik**.
+4.  Untuk membukanya kembali, analis terdaftar harus mengonfirmasi ulang wajahnya di depan kamera.
+
+### Sesi 3: Memilih Mode Kasus (Workspace Initialization)
+Sistem mendukung dua mode operasional yang dapat diakses melalui modul **Settings (Pengaturan)** di bagian kiri bawah navigasi:
+
+*   **Mode Produksi (Steril - Kasus Nyata)**:
+    *   Secara default, workspace berada dalam keadaan kosong (steril). Sangat cocok untuk mengunggah citra forensik asli dari barang bukti kasus nyata yang sedang Anda tangani menggunakan fitur *drag & drop* file.
+*   **Mode Simulasi (Kasus Latihan: CASE-POL-2026-07A)**:
+    *   Jika Anda ingin mencoba seluruh modul analisis, buka tab **Settings**, lalu klik tombol **Muat Kasus Simulasi**.
+    *   Sistem akan secara instan menginjeksi basis data latihan berkualitas tinggi termasuk perangkat Samsung Galaxy S24, rekaman ancaman, log database, percakapan SMS terlarang, dan jejak lokasi tersangka di area DKI Jakarta.
+
+### Sesi 4: Menjalankan Analisis Kasus
+Setelah mengaktifkan **Mode Simulasi**, Anda dapat menjelajahi modul-modul analisis bukti berikut:
+1.  **Dashboard**: Lihat ringkasan sebaran tingkat bahaya aplikasi terpasang, total ukuran bukti digital, integritas log kerja, dan status verifikasi biometrik.
+2.  **Connect Device**: Menganalisis parameter perangkat yang terhubung melalui antarmuka ADB.
+3.  **Logical Acquisition**: Melakukan akuisisi logis terstruktur dari sistem Android suspect.
+4.  **Evidence Explorer (Deleted Artifacts)**: Mengekstrak metadata tersembunyi pada berkas gambar (EXIF), membaca dokumen rahasia, serta melacak berkas residual berbahaya seperti `.apk` ilegal.
+5.  **SQLite Analyzer**: Lakukan simulasi pembongkaran database `mmssms.db` dan lakukan query SQL kustom interaktif untuk melihat pesan-pesan tersembunyi serta memulihkan data obrolan yang sengaja dihapus tersangka.
+6.  **Location History**: Melacak pergerakan tersangka menggunakan data koordinat GPS yang terekstrak dari metadata gambar dan log jaringan, dilengkapi estimasi total jarak perpindahan.
+7.  **Unified Timeline**: Melihat urutan waktu kejadian kronologis (kronologi perkara) yang menyatukan peristiwa SMS, panggilan telepon, dan aktivitas berkas dalam urutan waktu yang rapi.
+8.  **Export Report**: Susun Berita Acara Pemeriksaan (BAP) digital berstandar hukum dalam format PDF atau Word lengkap dengan stempel hash integritas digital (MD5 & SHA-256) untuk menjamin orisinalitas bukti di depan hakim.
+
+---
+
 ## 🗄️ Manajemen Workspace & Integritas Bukti
 
 Aplikasi ini mendukung dua mode sesi kerja yang dapat dikonfigurasi melalui menu **Settings (Pengaturan)**:
