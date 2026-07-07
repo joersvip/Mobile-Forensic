@@ -1,225 +1,178 @@
-# Mobile Forensic Analysis Suite
+# Mobile Forensic Analysis Suite v2.0
 
-**Mobile Forensic Analysis Suite** adalah aplikasi analisis forensik perangkat seluler profesional berstandar kepolisian yang dirancang untuk membantu penyidik, analis keamanan siber, dan ahli forensik digital dalam mengidentifikasi, memulihkan, dan mendokumentasikan bukti digital secara sah dan steril.
+**Mobile Forensic Analysis Suite v2.0** adalah platform digital forensik perangkat seluler profesional berstandar kepolisian yang dirancang untuk membantu penyidik cyber crime, analis keamanan, dan ahli forensik digital dalam mengidentifikasi, mengekstrak, menganalisis, dan mendokumentasikan bukti digital secara sah (admissible) dan steril.
 
-Aplikasi ini beroperasi sepenuhnya secara lokal (**offline-first**) untuk menjamin integritas data (Chain of Custody) dan kepatuhan hukum tanpa risiko kebocoran data ke jaringan publik.
+Platform ini beroperasi sepenuhnya secara lokal (**offline-first**) untuk menjamin integritas data (**Chain of Custody**), kepatuhan hukum (*compliance*), tanpa risiko kebocoran data sensitif ke jaringan publik atau server cloud.
 
 ---
 
-## 🌟 Fitur Utama & Modul Forensik
+## 🌟 Fitur Utama & Modul Forensik Terintegrasi
 
-### 1. Keamanan & Autentikasi Wajah Berkelanjutan (Continuous Face Security)
-*   **Login Mandiri Lokal (Offline)**: Autentikasi pengguna menggunakan verifikasi kombinasional antara Username, Password, dan Pengenalan Wajah yang dijalankan secara lokal pada peramban (browser).
-*   **Continuous Verifier (Anti-Intrusion)**: Menggunakan umpan kamera langsung secara berkala untuk mendeteksi apakah analis forensik yang sah masih berada di depan pos kerja. Jika analis meninggalkan tempat kerja atau terdeteksi wajah asing, aplikasi akan mengunci diri secara otomatis dalam waktu 5 detik untuk mencegah akses ilegal.
-*   **Audit Log Keamanan**: Setiap upaya login, kegagalan pencocokan wajah, dan aktivitas penguncian darurat dicatat secara permanen lengkap dengan parameter sidik jari perangkat (IP, OS, Browser).
+### 1. Keamanan Biometrik & Autentikasi Wajah Berkelanjutan (Continuous Face Security)
+*   **Offline Face Registration & Auth**: Melakukan registrasi akun penyidik dan pencocokan pola wajah (facial embedding matching) secara lokal pada sandbox peramban tanpa internet.
+*   **Continuous Verifier (Anti-Intrusion)**: Memantau feed kamera secara berkala. Jika penyidik meninggalkan komputer atau ada wajah tidak dikenal (intruder) yang masuk ke jangkauan kamera, aplikasi akan mengunci diri secara otomatis dalam waktu **5 detik** untuk mencegah pengubahan data bukti.
+*   **Security Audit Logs**: Setiap log aktivitas, kegagalan pencatatan wajah, atau penguncian darurat dicatat permanen lengkap dengan parameter sidik jari perangkat (IP, browser, dan operating system).
 
 ### 2. Hubungkan Perangkat & Akuisisi Logis (Logical Acquisition)
-*   **Manajemen Perangkat Terhubung**: Mendeteksi perangkat seluler yang terhubung via USB/ADB, menganalisis profil perangkat keras (CPU, RAM, IMEI, IMSI, Status Bootloader, status Root).
-*   **Akuisisi Data Logis**: Melakukan ekstraksi struktur file, log panggilan, log SMS, daftar aplikasi terpasang, dan rute lokasi secara terstruktur dengan output laporan terverifikasi hash kriptografi.
+*   **ADB USB Connection Link**: Mendeteksi perangkat seluler yang terhubung via USB Debugging (ADB), membaca metadata perangkat keras, IMEI, IMSI, status bootloader, dan status root secara aman.
+*   **Logical Acquisition Copy**: Melakukan duplikasi data obrolan, log panggilan, log pesan SMS, daftar aplikasi, dan metadata berkas ke dalam direktori kasus terenkripsi.
 
-### 3. Deleted Artifact Analysis (Modul Baru)
-*   Membantu analis mengidentifikasi artefak yang menunjukkan keberadaan data yang telah dihapus berdasarkan citra forensik atau salinan cadangan yang diperoleh secara sah.
-*   **Analisis Metadata & EXIF**: Mengekstrak metadata gambar dan koordinat GPS dari file foto.
-*   **Pemulihan Database Terhapus**: Membaca basis data SQLite hasil akuisisi dan memulihkan baris obrolan/kontak yang ditandai terhapus di memori tak terisi (*unallocated partition*).
-*   **Cache & Thumbnail Visualizer**: Pratinjau visual terhadap sisa cache aplikasi, log aktivitas sistem, dan berkas residual.
+### 3. Modul Analisis AI Lokal Mandiri (Local AI Engine)
+Sistem kecerdasan buatan berkinerja tinggi yang berjalan sepenuhnya offline memanfaatkan memori lokal tanpa API eksternal:
+*   **OCR Text Extractor**: Mengekstrak teks dari foto bukti transfer, tangkapan layar obrolan, atau dokumen kerja dengan algoritma segmentasi piksel lokal.
+*   **Image Object Classifier**: Mengklasifikasikan kategori foto bukti (e.g. senjata tajam, peta koordinat GPS, dokumen palsu) dengan kalkulasi tingkat akurasi (*confidence rate*).
+*   **Semantic Vector Search**: Melakukan pencarian konsep semantik melintasi berkas kasus menggunakan indeks kemiripan kosinus (*Cosine Similarity*) untuk melacak kata kunci konseptual seperti "dana", "sandi", "payload", dsb.
+*   **Artifact Grouping Match (Clustering)**: Pengelompokan cerdas otomatis yang mengorelasikan sisa-sisa bukti finansial maupun aktivitas malware ke dalam kluster kasus tertentu.
 
-### 4. SQLite Database Analyzer
-*   Mengeksplorasi struktur tabel basis data aplikasi seperti `mmssms.db` (SMS) dan `contacts2.db` (Daftar Kontak).
-*   Menjalankan query SQL interaktif untuk menyaring bukti obrolan dan memulihkan pesan terhapus (*carved records*) yang tersisa dalam basis data SQLite.
+### 4. SQLite Database Analyzer & Carving
+*   Mengeksplorasi tabel basis data internal Android (`mmssms.db`, `contacts.db`).
+*   **Interactive SQL Sandbox**: Menyediakan editor query SQL langsung untuk menyaring bukti obrolan dan mencari pesan atau kontak yang ditandai terhapus di memori tak terisi (*carved database records*).
 
 ### 5. Jejak Pemetaan Lokasi GPS (Location History & Geo-mapping)
-*   Memetakan seluruh titik koordinat GPS yang berhasil diekstrak dari EXIF gambar, database seluler, dan cache Wi-Fi.
-*   Menghitung statistik pergerakan suspect, estimasi jarak tempuh total (Km), serta visualisasi peta rute perjalanan interaktif.
+*   Mengekstrak koordinat GPS tersembunyi dari EXIF gambar, cache Wi-Fi, dan menampilkannya pada peta rute perjalanan interaktif tersangka beserta statistik estimasi total jarak perpindahan (Km).
 
 ### 6. Timeline Kronologis Kejadian (Unified Timeline)
-*   Menggabungkan pesan SMS, riwayat panggilan suara, dan waktu modifikasi berkas ke dalam satu visualisasi urutan waktu kronologis (Timeline) guna mempermudah penyidik menyusun kronologi perkara.
+*   Menggabungkan log panggilan telepon, pesan masuk/keluar, dan modifikasi berkas ke dalam satu urutan waktu kronologis yang runut untuk mempermudah rekonstruksi perkara di pengadilan.
 
 ### 7. Ekspor Laporan Hukum (Forensic Export)
-*   Menghasilkan berita acara pemeriksaan (BAP) digital resmi dalam format **PDF** atau **Word (DOCX)**.
-*   Menyertakan perhitungan nilai hash integritas (**MD5, SHA-256**) untuk setiap file bukti digital guna pembuktian sah di persidangan.
+*   Menghasilkan Berita Acara Pemeriksaan (BAP) digital dalam format PDF atau Word (DOCX).
+*   Menghitung nilai integritas berkas bukti secara real-time dengan algoritma hashing standar forensik (**MD5 & SHA-256**) untuk menjamin orisinalitas bukti di depan hakim.
 
 ---
 
-## ⚙️ Panduan Instalasi & Kesesuaian Kali Linux (Native Setup)
+## 💻 Panduan Instalasi & Kesesuaian Kali Linux (Native Setup)
 
-Aplikasi ini sepenuhnya kompatibel dan direkomendasikan untuk dijalankan di **Kali Linux** sebagai bagian dari sistem operasi andalan forensik Anda.
+Aplikasi ini kompatibel penuh dengan **Kali Linux** sebagai sistem operasi standar digital forensik Anda.
 
 ### Prasyarat Sistem pada Kali Linux:
-Pastikan repositori sistem dan paket esensial telah diperbarui:
 ```bash
 sudo apt update && sudo apt upgrade -y
 ```
 
-### Langkah 1: Instalasi Node.js & NPM di Kali Linux
-Gunakan NodeSource PPA untuk menginstal Node.js v20 (LTS):
+### Langkah 1: Instalasi Node.js & NPM
 ```bash
-# Mengunduh dan menyiapkan repositori NodeSource
+# Mengunduh repositori NodeSource Node.js v20 (LTS)
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 
-# Menginstal Node.js dan build-essential (untuk kompilasi pustaka asli jika diperlukan)
+# Menginstal Node.js dan perkakas kompilasi
 sudo apt-get install -y nodejs build-essential
-```
-Verifikasi instalasi Anda:
-```bash
-node -v
-npm -v
 ```
 
 ### Langkah 2: Instalasi Kebutuhan ADB (Android Debug Bridge)
-Untuk memanfaatkan modul analisis konektivitas perangkat Android secara maksimal di Kali Linux:
 ```bash
 sudo apt install -y adb fastboot
 ```
-*Tip Penting: Agar peramban Anda dapat berinteraksi dengan daemon ADB, pastikan izin udev untuk USB debugging sudah diatur pada sistem Kali Linux Anda.*
 
-### Langkah 3: Konfigurasi Akses Webcam (Izin Kamera di Kali Linux)
-Karena modul **Continuous Face Security** menggunakan kamera, pastikan pengguna aktif Anda masuk dalam grup `video`:
+### Langkah 3: Konfigurasi Akses Webcam (Continuous Face Security)
 ```bash
 sudo usermod -aG video $USER
-# Setelah menjalankan perintah di atas, silakan log out lalu log in kembali ke Kali Linux Anda.
+# Silakan log out dan log in kembali setelah menjalankan perintah ini.
 ```
 
-### Langkah 4: Kloning & Pemasangan Aplikasi
+### Langkah 4: Kloning & Pemasangan Dependensi
 ```bash
 git clone <url-repositori-anda>
 cd <nama-folder-aplikasi>
-
-# Instal dependensi lokal
 npm install
 ```
 
 ### Langkah 5: Menjalankan Aplikasi
-*   **Mode Pengembangan (Development Mode)**:
+*   **Mode Pengembangan (Development)**:
     ```bash
     npm run dev
     ```
-    Buka peramban (rekomendasi: Chromium atau Firefox ESR bawaan Kali Linux) di alamat: **`http://localhost:3000`**
-*   **Mode Produksi (Terkompilasi Amat Aman)**:
+    Buka peramban di alamat: **`http://localhost:3000`**
+*   **Mode Produksi (Build & Start)**:
     ```bash
     npm run build
-    ```
-    Lalu nyalakan server dengan perintah:
-    ```bash
     npm start
     ```
 
 ---
 
-## 🐳 Panduan Instalasi Menggunakan Docker (Windows & macOS)
+## 📦 Panduan Kompilasi Aplikasi Native Desktop QT (Installer Builder)
 
-Untuk mempermudah portabilitas tanpa mengotori sistem host dengan instalasi Node.js, Anda dapat mengoperasikan suite forensik ini menggunakan **Docker**. Metode ini sangat direkomendasikan untuk pengguna **Windows 10/11** dan **macOS (Intel/Apple Silicon)**.
+Kami menyediakan skrip utilitas khusus untuk mengompilasi dan mengemas platform digital forensik ini menjadi aplikasi desktop native executable (Qt/PySide6 framework wrapper) yang siap diinstal di berbagai sistem operasi tanpa memerlukan instalasi Node.js di komputer target.
 
-### Prasyarat Docker:
-*   **Windows**: Instal [Docker Desktop](https://www.docker.com/products/docker-desktop/) dan pastikan fitur **WSL 2 (Windows Subsystem for Linux)** telah diaktifkan.
-*   **macOS**: Instal [Docker Desktop for Mac](https://www.docker.com/products/docker-desktop/) (pilih versi Apple Silicon jika menggunakan Mac M1/M2/M3, atau Intel jika menggunakan Mac model lama).
+Skrip kompilasi terletak di: `/src/installer/build_installers.py`
 
-### Metode A: Menggunakan Docker Compose (Direkomendasikan)
-Cara tercepat untuk meluncurkan kontainer:
+### Prasyarat Kompilasi:
+1. Pastikan Python 3 sudah terinstal di sistem Anda.
+2. Instal dependensi compiler PyInstaller dan PySide6:
+   ```bash
+   pip install pyinstaller pyside6
+   ```
+
+### Langkah Kompilasi ke Executable Native:
+Jalankan skrip pembangun installer di direktori proyek:
 ```bash
-# Buka Terminal (macOS) atau PowerShell/Command Prompt (Windows) di direktori aplikasi
+python3 src/installer/build_installers.py
+```
+
+### Hasil Kompilasi & Dukungan OS:
+Skrip pembangun akan mendeteksi sistem operasi host Anda secara otomatis dan menghasilkan paket installer yang sesuai:
+*   **Windows (`win32`)**: Menghasilkan file executable portabel `.exe` dalam folder `/dist` dan memicu konfigurasi pembungkus file MSI (Microsoft Installer) menggunakan WiX Toolset.
+*   **macOS (`darwin`)**: Menghasilkan bundel aplikasi native `.app` dan membungkusnya ke dalam citra disk DMG (`.dmg`).
+*   **Linux (`linux`)**: Menghasilkan executable biner Linux ELF portabel dan mempersiapkan struktur paket `.deb` untuk Debian/Ubuntu/Kali Linux.
+
+---
+
+## 🐳 Panduan Instalasi Menggunakan Docker
+
+Anda dapat menjalankan suite forensik ini di dalam Docker untuk menghindari instalasi perkakas tambahan pada sistem host Anda.
+
+```bash
+# Membangun dan menjalankan kontainer via Docker Compose
 docker compose up -d --build
 ```
-Perintah ini akan otomatis:
-1.  Membangun image Next.js yang dioptimalkan dalam mode *multi-stage build*.
-2.  Memulai kontainer `mobile_forensic_suite` di latar belakang (*detached mode*).
-3.  Memetakan aplikasi ke port **`http://localhost:3000`**.
-
-### Metode B: Menggunakan Docker CLI Standar
-Jika Anda tidak ingin menggunakan docker-compose:
-```bash
-# 1. Bangun Docker Image
-docker build -t mobile-forensic-suite:latest .
-
-# 2. Jalankan Kontainer
-docker run -d -p 3000:3000 --name mobile_forensic_suite mobile-forensic-suite:latest
-```
-
-### Panduan Akses Kamera Webcam di Docker:
-*   **Windows (Docker Desktop + WSL2)**: Secara default, kontainer Docker di WSL2 memerlukan jembatan tambahan seperti `usbipd-win` untuk mengakses kamera fisik USB webcam. Cara paling praktis adalah dengan mengakses port kontainer `http://localhost:3000` dari peramban host (Windows Chrome/Edge), karena peramban host yang akan memproses deteksi wajah lokal (Webcam API) melalui sandboxing HTML5 peramban secara langsung tanpa membebani kontainer Docker dengan driver hardware.
-*   **macOS**: Sama seperti Windows, jalankan kontainer Docker di latar belakang, dan akses aplikasinya via peramban Safari atau Chrome di macOS Anda. Peramban host akan menangani interaksi kamera lokal secara aman.
-
-### Menghentikan Kontainer:
-```bash
-# Jika menggunakan docker-compose:
-docker compose down
-
-# Jika menggunakan docker CLI standar:
-docker stop mobile_forensic_suite && docker rm mobile_forensic_suite
-```
+Aplikasi akan dapat diakses pada alamat **`http://localhost:3000`**. Untuk modul kamera, peramban web host Anda yang akan mengeksekusi analisis wajah secara aman sehingga driver kamera hardware tidak perlu diekspos ke dalam kontainer Linux Docker secara langsung.
 
 ---
 
-## 🚀 Panduan Penggunaan (Usage Guide)
+## 🚀 Tutorial Langkah demi Langkah Penggunaan Praktis
 
-Untuk memanfaatkan kapabilitas penuh dari **Mobile Forensic Analysis Suite**, silakan ikuti alur skenario operasional berikut:
+Gunakan tutorial terstruktur di bawah ini untuk mensimulasikan kasus siber nyata:
 
-### Sesi 1: Registrasi & Pendaftaran Wajah (Awal)
-1.  Saat pertama kali membuka aplikasi, Anda akan diarahkan ke halaman **Sistem Autentikasi Pengguna**.
-2.  Karena sistem beroperasi secara offline, Anda harus **mendaftarkan akun baru** terlebih dahulu dengan mengeklik tombol **Registrasi Akun Baru**.
-3.  Masukkan Username dan Password baru, lalu aktifkan Webcam perangkat untuk menangkap gambar wajah Anda sebagai kunci enkripsi biometrik lokal.
-4.  Setelah registrasi sukses, lakukan **Login** menggunakan kredensial yang baru saja Anda buat bersama pencocokan wajah langsung secara real-time.
+### 📖 Tutorial 1: Registrasi Akun & Pendaftaran Biometrik Wajah
+1.  Buka aplikasi di peramban (**`http://localhost:3000`**).
+2.  Karena sistem beroperasi offline, klik **Registrasi Akun Baru** pada layar login.
+3.  Masukkan Username (contoh: `investigator_rian`), Password, Nama Lengkap, dan pilih peran Anda (`Administrator` atau `Examiner`).
+4.  Izinkan akses Webcam pada peramban Anda, posisikan wajah Anda tepat di tengah kotak deteksi kamera, lalu klik **Daftarkan Wajah & Akun**.
+5.  Setelah sukses, masuk menggunakan kredensial tersebut dengan mengarahkan wajah Anda ke kamera untuk autentikasi ganda secara instan.
 
-### Sesi 2: Menjaga Kredensial (Continuous Face Security)
-1.  Setelah berhasil login ke Dashboard, sistem pengawasan **Continuous Verifier (Anti-Intrusion)** akan aktif di pojok kiri bawah.
-2.  Modul ini akan memantau umpan kamera Anda setiap beberapa detik secara aman dan lokal.
-3.  Jika analis meninggalkan meja kerja, memalingkan wajah, atau jika ada orang asing yang masuk ke jangkauan kamera, sistem akan mendeteksi intrusi tersebut dan **mengunci antarmuka aplikasi secara otomatis dalam waktu 5 detik**.
-4.  Untuk membukanya kembali, analis terdaftar harus mengonfirmasi ulang wajahnya di depan kamera.
+### 📖 Tutorial 2: Inisialisasi Workspace Kasus & ADB Link
+1.  Secara default, aplikasi berada dalam **Mode Produksi (Steril)** di mana data bukti masih kosong untuk menjamin kesucian barang bukti nyata.
+2.  Untuk keperluan uji coba/simulasi, navigasikan ke menu **Settings** di pojok kiri bawah.
+3.  Klik tombol **Muat Kasus Simulasi**. Sistem akan menginjeksi data kasus simulasi interaktif berkualitas tinggi (`CASE-POL-2026-07A`).
+4.  Buka tab **Connected Devices** atau klik tombol **Auto Detect** pada bar atas (Ribbon) untuk menguji daemon USB ADB link terhadap perangkat Samsung Galaxy S24 Ultra tersangka yang terhubung.
+5.  Klik **Logical Copy** pada Ribbon untuk menyimulasikan ekstraksi berkas biner perangkat secara logis.
 
-### Sesi 3: Memilih Mode Kasus (Workspace Initialization)
-Sistem mendukung dua mode operasional yang dapat diakses melalui modul **Settings (Pengaturan)** di bagian kiri bawah navigasi:
+### 📖 Tutorial 3: Melakukan Analisis Berkas & OCR dengan AI Lokal
+1.  Navigasikan ke tab **Local AI Engine**.
+2.  Pilih sub-tab **OCR Text Extractor**.
+3.  Di panel kiri, pilih berkas gambar tersangka, misalnya `bukti_transfer_gelap.png`.
+4.  Klik tombol **Jalankan Local OCR Scan**. Sistem akan memproses integral histogram piksel secara offline dan mengekstrak rincian teks gelap, seperti:
+    *   *Transaksi gelap, nominal Rp 500.000.000, bank penerima, dan tanggal transaksi.*
+5.  Buka sub-tab **Image Object Classifier** dan pilih foto senjata `pistol_weapon_photo.jpg`. Klik **Proses Klasifikasi Objek** untuk mendeteksi ancaman senjata semi-otomatis dengan tingkat akurasi di atas 98%.
+6.  Buka sub-tab **Semantic Offline Search**, ketik konsep pencarian seperti `dana` atau `payload` untuk mencari dokumen atau riwayat obrolan yang memiliki relasi makna terdekat melalui kalkulasi matriks *Cosine Similarity*.
 
-*   **Mode Produksi (Steril - Kasus Nyata)**:
-    *   Secara default, workspace berada dalam keadaan kosong (steril). Sangat cocok untuk mengunggah citra forensik asli dari barang bukti kasus nyata yang sedang Anda tangani menggunakan fitur *drag & drop* file.
-*   **Mode Simulasi (Kasus Latihan: CASE-POL-2026-07A)**:
-    *   Jika Anda ingin mencoba seluruh modul analisis, buka tab **Settings**, lalu klik tombol **Muat Kasus Simulasi**.
-    *   Sistem akan secara instan menginjeksi basis data latihan berkualitas tinggi termasuk perangkat Samsung Galaxy S24, rekaman ancaman, log database, percakapan SMS terlarang, dan jejak lokasi tersangka di area DKI Jakarta.
+### 📖 Tutorial 4: Melakukan Query Database SQLite Tersangka
+1.  Buka tab **SQLite Analyzer**.
+2.  Pada dropdown pemilihan database, pilih basis data pesan tersangka: `mmssms.db`.
+3.  Di editor SQL, Anda akan melihat struktur skema tabel `messages`.
+4.  Untuk menganalisis pesan obrolan yang sengaja dihapus oleh tersangka, klik tombol **Jalankan Query Pemulihan Obrolan**.
+5.  Sistem akan mengeksekusi fungsi carving biner memori tak terisi (*unallocated chunks*) pada file SQLite dan menampilkan baris-baris obrolan rahasia tersangka yang berwarna merah, bertanda **[DELETED_RECORD]**.
 
-### Sesi 4: Menjalankan Analisis Kasus
-Setelah mengaktifkan **Mode Simulasi**, Anda dapat menjelajahi modul-modul analisis bukti berikut:
-1.  **Dashboard**: Lihat ringkasan sebaran tingkat bahaya aplikasi terpasang, total ukuran bukti digital, integritas log kerja, dan status verifikasi biometrik.
-2.  **Connect Device**: Menganalisis parameter perangkat yang terhubung melalui antarmuka ADB.
-3.  **Logical Acquisition**: Melakukan akuisisi logis terstruktur dari sistem Android suspect.
-4.  **Evidence Explorer (Deleted Artifacts)**: Mengekstrak metadata tersembunyi pada berkas gambar (EXIF), membaca dokumen rahasia, serta melacak berkas residual berbahaya seperti `.apk` ilegal.
-5.  **SQLite Analyzer**: Lakukan simulasi pembongkaran database `mmssms.db` dan lakukan query SQL kustom interaktif untuk melihat pesan-pesan tersembunyi serta memulihkan data obrolan yang sengaja dihapus tersangka.
-6.  **Location History**: Melacak pergerakan tersangka menggunakan data koordinat GPS yang terekstrak dari metadata gambar dan log jaringan, dilengkapi estimasi total jarak perpindahan.
-7.  **Unified Timeline**: Melihat urutan waktu kejadian kronologis (kronologi perkara) yang menyatukan peristiwa SMS, panggilan telepon, dan aktivitas berkas dalam urutan waktu yang rapi.
-8.  **Export Report**: Susun Berita Acara Pemeriksaan (BAP) digital berstandar hukum dalam format PDF atau Word lengkap dengan stempel hash integritas digital (MD5 & SHA-256) untuk menjamin orisinalitas bukti di depan hakim.
-
----
-
-## 🗄️ Manajemen Workspace & Integritas Bukti
-
-Aplikasi ini mendukung dua mode sesi kerja yang dapat dikonfigurasi melalui menu **Settings (Pengaturan)**:
-
-### A. Mode Produksi (Sesi Bersih - Siap Pakai)
-*   **Kondisi Standar / Default**: Saat pertama kali dijalankan, sistem berada pada **Mode Produksi Bersih**. Tidak ada data dummy suspect, tidak ada riwayat SMS, panggilan, koordinat, atau perangkat terhubung yang ter-load secara bawaan.
-*   Workspace berada dalam keadaan steril 100% dan siap digunakan oleh analis untuk mengunggah file bukti nyata atau menghubungkan perangkat fisik asli guna memulai investigasi legal.
-
-### B. Mode Simulasi (Kasus Latihan: `CASE-POL-2026-07A`)
-*   Untuk keperluan pelatihan, evaluasi, demonstrasi, dan pengujian sistem, analis dapat memuat kasus simulasi interaktif melalui menu **Settings**.
-*   Setelah diaktifkan, sistem akan menginjeksikan data kasus forensik simulasi bernilai fidelitas tinggi (high-fidelity) termasuk:
-    *   **Perangkat**: Samsung Galaxy S24 Ultra terhubung ADB.
-    *   **Pesan obrolan tersembunyi**: Bukti transaksi mencurigakan dan file payload `.apk` berbahaya.
-    *   **Koordinat Lokasi**: Jejak perpindahan tersangka di area DKI Jakarta.
-    *   **Artefak Terhapus**: Berkas PDF rahasia kerja sama gelap dan rekaman ancaman (.wav) yang berhasil dipulihkan.
+### 📖 Tutorial 5: Menyusun Berita Acara Pemeriksaan (BAP) & Hashing
+1.  Buka tab **Hash Verification**. Klik **Mulai Verifikasi Hash Integritas** untuk menghitung tanda tangan SHA-256 dan MD5 dari semua berkas bukti guna memastikan tidak terjadi perubahan data sejak pertama kali diambil (*Chain of Custody*).
+2.  Buka tab **Dashboard** untuk memverifikasi log audit sistem Anda sudah merekam aktivitas penelusuran bukti dengan steril.
+3.  Gunakan menu laporan di aplikasi untuk mengekspor BAP hukum digital yang sah dalam format dokumen cetak resmi.
 
 ---
 
-## 🛠️ Stack Teknologi
+## 🔒 Jaminan Integritas & Chain of Custody
 
-Aplikasi dibangun menggunakan teknologi modern berkinerja tinggi:
--   **Framework**: Next.js 15 (App Router) dengan TypeScript.
--   **Gaya & Tata Letak**: Tailwind CSS v4 dengan palet warna bernuansa militer-industri gelap (*Cosmic Charcoal* dan aksen *Neon Cyan*) yang aman bagi mata penyidik selama berjam-jam bekerja.
--   **Animasi**: Framer Motion (`motion/react`) untuk transisi antar modul yang mulus.
--   **Ikonografi**: Lucide React.
--   **Visualisasi Data**: Recharts & D3 untuk diagram statistik sebaran artefak.
--   **Persistensi Data**: `localStorage` terenkripsi dan simulasi basis data relasional lokal yang aman di dalam sandbox peramban.
-
----
-
-## 🔒 Dokumen Kepatuhan Chain of Custody
-
-Setiap kali data diekstrak atau dokumen laporan forensik diekspor, sistem akan secara otomatis melampirkan:
-1.  **Metadata Berkas**: Nama file, jalur mutlak (*absolute path*), ukuran byte, mime-type, serta waktu pembuatan, modifikasi, dan pembacaan terakhir.
-2.  **Kunci Integritas**: Tanda tangan digital menggunakan algoritma hashing **SHA-256** dan **MD5** yang dihitung secara dinamis untuk mendeteksi perubahan sekecil apa pun pada file bukti digital.
-3.  **Audit Trail**: Catatan log audit lengkap yang melacak nama pemeriksa forensik (*Examiner Name*), divisi organisasi (*Cyber Crime Unit*), nomor registrasi perkara (*Case Reference Number*), serta stempel waktu (UTC/WIB).
+Untuk menjamin orisinalitas di hadapan persidangan pidana:
+1.  Setiap biner dan berkas bukti digital yang dimuat langsung dihitung nilai hash SHA-256 dan MD5-nya secara dinamis.
+2.  Sistem menyertakan stempel waktu (**UTC / WIB**) presisi tinggi pada setiap entri Audit Trail.
+3.  Setiap laporan ekspor menyertakan tanda tangan digital penyidik (*Examiner Signature*) dan sidik jari kriptografi data mentah.

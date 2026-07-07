@@ -1,0 +1,84 @@
+/* Dark Intelligence Modern QSS Stylesheet */
+
+QMainWindow {
+    background-color: #090a0f;
+    color: #e2e8f0;
+    font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+QMenuBar {
+    background-color: #0f111a;
+    border-bottom: 1px solid #1e293b;
+    color: #cbd5e1;
+}
+
+QMenuBar::item:selected {
+    background-color: #1e293b;
+    color: #38bdf8;
+}
+
+QToolBar {
+    background-color: #0f111a;
+    border-bottom: 1px solid #1e293b;
+    spacing: 8px;
+    padding: 4px;
+}
+
+QTabWidget::pane {
+    border: 1px solid #1e293b;
+    background-color: #090a0f;
+}
+
+QTabBar::tab {
+    background-color: #0f111a;
+    border: 1px solid #1e293b;
+    border-bottom-color: none;
+    color: #94a3b8;
+    padding: 6px 12px;
+    margin-right: 2px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+QTabBar::tab:selected {
+    background-color: #1e293b;
+    color: #38bdf8;
+    border-bottom: 2px solid #06b6d4;
+    font-weight: bold;
+}
+
+QDockWidget {
+    color: #cbd5e1;
+    titlebar-close-icon: none;
+    titlebar-normal-icon: none;
+}
+
+QDockWidget::title {
+    background-color: #0f111a;
+    text-align: center;
+    padding: 6px;
+    border-bottom: 1px solid #1e293b;
+}
+
+QPushButton {
+    background-color: #0284c7;
+    color: #ffffff;
+    border: 1px solid #0369a1;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-weight: 600;
+}
+
+QPushButton:hover {
+    background-color: #0369a1;
+}
+
+QPushButton:pressed {
+    background-color: #075985;
+}
+
+QStatusBar {
+    background-color: #0f111a;
+    color: #64748b;
+    border-top: 1px solid #1e293b;
+}
