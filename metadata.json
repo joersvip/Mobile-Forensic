@@ -1,0 +1,6 @@
+{
+  "name": "Mobile Forensic Analysis Suite",
+  "description": "Professional mobile forensic analysis, logical acquisition, SQLite database exploration, metadata extraction, timeline visualization, and report generation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
