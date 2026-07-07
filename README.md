@@ -13,9 +13,12 @@ Platform ini beroperasi sepenuhnya secara lokal (**offline-first**) untuk menjam
 *   **Continuous Verifier (Anti-Intrusion)**: Memantau feed kamera secara berkala. Jika penyidik meninggalkan komputer atau ada wajah tidak dikenal (intruder) yang masuk ke jangkauan kamera, aplikasi akan mengunci diri secara otomatis dalam waktu **5 detik** untuk mencegah pengubahan data bukti.
 *   **Security Audit Logs**: Setiap log aktivitas, kegagalan pencatatan wajah, atau penguncian darurat dicatat permanen lengkap dengan parameter sidik jari perangkat (IP, browser, dan operating system).
 
-### 2. Hubungkan Perangkat & Akuisisi Logis (Logical Acquisition)
-*   **ADB USB Connection Link**: Mendeteksi perangkat seluler yang terhubung via USB Debugging (ADB), membaca metadata perangkat keras, IMEI, IMSI, status bootloader, dan status root secara aman.
-*   **Logical Acquisition Copy**: Melakukan duplikasi data obrolan, log panggilan, log pesan SMS, daftar aplikasi, dan metadata berkas ke dalam direktori kasus terenkripsi.
+### 2. Hubungkan Perangkat & Akuisisi Nyata (Real Hardware Interconnection)
+Kami menyediakan empat jalur interkoneksi perangkat nyata dan simulasi secara fleksibel:
+*   **WebUSB Hardware Link (Direct Browser-to-USB)**: Membaca deskriptor USB dari perangkat fisik secara langsung lewat browser controller untuk membaca Vendor ID (VID), Product ID (PID), dan serial number fisik orisinal.
+*   **Local ADB Daemon (Host Native Scan)**: Menginterogasi server ADB yang aktif di komputer host/stasiun kerja forensik Anda melalui endpoint backend `/api/devices` (menjalankan `adb devices -l` secara native).
+*   **Wireless ADB over Wi-Fi**: Mengaktifkan link socket nirkabel portabel ke perangkat android di jaringan Wi-Fi lokal yang sama melalui endpoint backend `/api/devices/connect` (menjalankan `adb connect <ip:port>` secara native).
+*   **Training & Case Simulation**: Modul simulasi forensik offline interaktif untuk pelatihan analisis kasus tanpa membutuhkan hardware fisik.
 
 ### 3. Modul Analisis AI Lokal Mandiri (Local AI Engine)
 Sistem kecerdasan buatan berkinerja tinggi yang berjalan sepenuhnya offline memanfaatkan memori lokal tanpa API eksternal:
@@ -131,7 +134,7 @@ Aplikasi akan dapat diakses pada alamat **`http://localhost:3000`**. Untuk modul
 
 ## 🚀 Tutorial Langkah demi Langkah Penggunaan Praktis
 
-Gunakan tutorial terstruktur di bawah ini untuk mensimulasikan kasus siber nyata:
+Gunakan tutorial terstruktur di bawah ini untuk melakukan analisis kasus siber nyata:
 
 ### 📖 Tutorial 1: Registrasi Akun & Pendaftaran Biometrik Wajah
 1.  Buka aplikasi di peramban (**`http://localhost:3000`**).
@@ -140,12 +143,15 @@ Gunakan tutorial terstruktur di bawah ini untuk mensimulasikan kasus siber nyata
 4.  Izinkan akses Webcam pada peramban Anda, posisikan wajah Anda tepat di tengah kotak deteksi kamera, lalu klik **Daftarkan Wajah & Akun**.
 5.  Setelah sukses, masuk menggunakan kredensial tersebut dengan mengarahkan wajah Anda ke kamera untuk autentikasi ganda secara instan.
 
-### 📖 Tutorial 2: Inisialisasi Workspace Kasus & ADB Link
-1.  Secara default, aplikasi berada dalam **Mode Produksi (Steril)** di mana data bukti masih kosong untuk menjamin kesucian barang bukti nyata.
-2.  Untuk keperluan uji coba/simulasi, navigasikan ke menu **Settings** di pojok kiri bawah.
-3.  Klik tombol **Muat Kasus Simulasi**. Sistem akan menginjeksi data kasus simulasi interaktif berkualitas tinggi (`CASE-POL-2026-07A`).
-4.  Buka tab **Connected Devices** atau klik tombol **Auto Detect** pada bar atas (Ribbon) untuk menguji daemon USB ADB link terhadap perangkat Samsung Galaxy S24 Ultra tersangka yang terhubung.
-5.  Klik **Logical Copy** pada Ribbon untuk menyimulasikan ekstraksi berkas biner perangkat secara logis.
+### 📖 Tutorial 2: Menghubungkan Hardware Perangkat Nyata (Real Interconnection)
+1.  Buka tab **Connected Devices** di panel navigasi kiri.
+2.  Pada bar metode koneksi di bagian atas, pilih salah satu metode interkoneksi nyata:
+    *   **Metode WebUSB Hardware**: Hubungkan ponsel Android target menggunakan kabel USB ke PC Anda. Klik tombol **Hubungkan Perangkat USB Fisik Nyata**, lalu pilih perangkat USB Anda pada popup browser.
+        *   *Catatan keamanan: Jika popup pemilih tidak muncul, pastikan Anda telah membuka aplikasi di tab browser baru (bukan di dalam iframe preview).*
+    *   **Metode Local ADB Daemon**: Aktifkan USB Debugging di ponsel target. Jalankan program ADB lokal Anda di Kali Linux host. Klik tombol **Pindai Server ADB Lokal** untuk membaca properti firmware dan serial number orisinal secara langsung lewat Next.js API Route.
+    *   **Metode ADB over Wi-Fi**: Masukkan alamat IP nirkabel target (misalnya: `192.168.1.104:5555`) lalu klik **Koneksikan Wireless** untuk mengikat jaringan nirkabel lewat daemon ADB.
+3.  Pilih perangkat nyata yang terdeteksi pada daftar untuk memantau detail status diagnostik, baterai, dan ukuran partisi memori secara real-time.
+4.  Gunakan tombol **Logical Copy** pada Ribbon atas untuk memulai ekstraksi file biner, daftar kontak, dan log panggilan secara steril.
 
 ### 📖 Tutorial 3: Melakukan Analisis Berkas & OCR dengan AI Lokal
 1.  Navigasikan ke tab **Local AI Engine**.
