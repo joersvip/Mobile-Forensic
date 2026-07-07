@@ -40,48 +40,111 @@ Aplikasi ini beroperasi sepenuhnya secara lokal (**offline-first**) untuk menjam
 
 ---
 
-## ⚙️ Panduan Instalasi (Installation Guide)
+## ⚙️ Panduan Instalasi & Kesesuaian Kali Linux (Native Setup)
 
-Ikuti langkah-langkah di bawah ini untuk memasang dan menjalankan aplikasi ini di lingkungan lokal Anda.
+Aplikasi ini sepenuhnya kompatibel dan direkomendasikan untuk dijalankan di **Kali Linux** sebagai bagian dari sistem operasi andalan forensik Anda.
 
-### Prasyarat Sistem
-Pastikan perangkat Anda sudah terinstal perangkat lunak berikut:
-*   **Node.js** (Versi 18.x atau yang lebih baru direkomendasikan)
-*   **npm** (Bawaan dari instalasi Node.js) atau **yarn**
+### Prasyarat Sistem pada Kali Linux:
+Pastikan repositori sistem dan paket esensial telah diperbarui:
+```bash
+sudo apt update && sudo apt upgrade -y
+```
 
-### Langkah 1: Kloning atau Unduh Repositori
-Ekstrak berkas ZIP kode sumber atau lakukan kloning langsung menggunakan git:
+### Langkah 1: Instalasi Node.js & NPM di Kali Linux
+Gunakan NodeSource PPA untuk menginstal Node.js v20 (LTS):
+```bash
+# Mengunduh dan menyiapkan repositori NodeSource
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+
+# Menginstal Node.js dan build-essential (untuk kompilasi pustaka asli jika diperlukan)
+sudo apt-get install -y nodejs build-essential
+```
+Verifikasi instalasi Anda:
+```bash
+node -v
+npm -v
+```
+
+### Langkah 2: Instalasi Kebutuhan ADB (Android Debug Bridge)
+Untuk memanfaatkan modul analisis konektivitas perangkat Android secara maksimal di Kali Linux:
+```bash
+sudo apt install -y adb fastboot
+```
+*Tip Penting: Agar peramban Anda dapat berinteraksi dengan daemon ADB, pastikan izin udev untuk USB debugging sudah diatur pada sistem Kali Linux Anda.*
+
+### Langkah 3: Konfigurasi Akses Webcam (Izin Kamera di Kali Linux)
+Karena modul **Continuous Face Security** menggunakan kamera, pastikan pengguna aktif Anda masuk dalam grup `video`:
+```bash
+sudo usermod -aG video $USER
+# Setelah menjalankan perintah di atas, silakan log out lalu log in kembali ke Kali Linux Anda.
+```
+
+### Langkah 4: Kloning & Pemasangan Aplikasi
 ```bash
 git clone <url-repositori-anda>
 cd <nama-folder-aplikasi>
-```
 
-### Langkah 2: Instalasi Dependensi
-Jalankan perintah berikut untuk menginstal seluruh paket pustaka yang dibutuhkan:
-```bash
+# Instal dependensi lokal
 npm install
 ```
 
-### Langkah 3: Konfigurasi Variabel Lingkungan (Opsional)
-Salin berkas contoh konfigurasi lingkungan jika tersedia atau buat berkas `.env.local` pada direktori utama:
-```bash
-cp .env.example .env.local
-```
-*(Catatan: Aplikasi ini dirancang untuk bekerja secara offline tanpa ketergantungan server eksternal, sehingga konfigurasi API key bersifat opsional kecuali Anda ingin mengintegrasikannya dengan layanan cloud tambahan).*
+### Langkah 5: Menjalankan Aplikasi
+*   **Mode Pengembangan (Development Mode)**:
+    ```bash
+    npm run dev
+    ```
+    Buka peramban (rekomendasi: Chromium atau Firefox ESR bawaan Kali Linux) di alamat: **`http://localhost:3000`**
+*   **Mode Produksi (Terkompilasi Amat Aman)**:
+    ```bash
+    npm run build
+    ```
+    Lalu nyalakan server dengan perintah:
+    ```bash
+    npm start
+    ```
 
-### Langkah 4: Jalankan Server Pengembangan
-Jalankan aplikasi di mode pengembangan (development mode) pada mesin lokal Anda:
-```bash
-npm run dev
-```
-Setelah perintah berhasil dijalankan, buka peramban Anda dan akses tautan berikut:
-**[http://localhost:3000](http://localhost:3000)**
+---
 
-### Langkah 5: Build untuk Mode Produksi
-Jika ingin melakukan kompilasi aplikasi agar siap dijalankan secara optimal di lingkungan produksi:
+## 🐳 Panduan Instalasi Menggunakan Docker (Windows & macOS)
+
+Untuk mempermudah portabilitas tanpa mengotori sistem host dengan instalasi Node.js, Anda dapat mengoperasikan suite forensik ini menggunakan **Docker**. Metode ini sangat direkomendasikan untuk pengguna **Windows 10/11** dan **macOS (Intel/Apple Silicon)**.
+
+### Prasyarat Docker:
+*   **Windows**: Instal [Docker Desktop](https://www.docker.com/products/docker-desktop/) dan pastikan fitur **WSL 2 (Windows Subsystem for Linux)** telah diaktifkan.
+*   **macOS**: Instal [Docker Desktop for Mac](https://www.docker.com/products/docker-desktop/) (pilih versi Apple Silicon jika menggunakan Mac M1/M2/M3, atau Intel jika menggunakan Mac model lama).
+
+### Metode A: Menggunakan Docker Compose (Direkomendasikan)
+Cara tercepat untuk meluncurkan kontainer:
 ```bash
-npm run build
-npm start
+# Buka Terminal (macOS) atau PowerShell/Command Prompt (Windows) di direktori aplikasi
+docker compose up -d --build
+```
+Perintah ini akan otomatis:
+1.  Membangun image Next.js yang dioptimalkan dalam mode *multi-stage build*.
+2.  Memulai kontainer `mobile_forensic_suite` di latar belakang (*detached mode*).
+3.  Memetakan aplikasi ke port **`http://localhost:3000`**.
+
+### Metode B: Menggunakan Docker CLI Standar
+Jika Anda tidak ingin menggunakan docker-compose:
+```bash
+# 1. Bangun Docker Image
+docker build -t mobile-forensic-suite:latest .
+
+# 2. Jalankan Kontainer
+docker run -d -p 3000:3000 --name mobile_forensic_suite mobile-forensic-suite:latest
+```
+
+### Panduan Akses Kamera Webcam di Docker:
+*   **Windows (Docker Desktop + WSL2)**: Secara default, kontainer Docker di WSL2 memerlukan jembatan tambahan seperti `usbipd-win` untuk mengakses kamera fisik USB webcam. Cara paling praktis adalah dengan mengakses port kontainer `http://localhost:3000` dari peramban host (Windows Chrome/Edge), karena peramban host yang akan memproses deteksi wajah lokal (Webcam API) melalui sandboxing HTML5 peramban secara langsung tanpa membebani kontainer Docker dengan driver hardware.
+*   **macOS**: Sama seperti Windows, jalankan kontainer Docker di latar belakang, dan akses aplikasinya via peramban Safari atau Chrome di macOS Anda. Peramban host akan menangani interaksi kamera lokal secara aman.
+
+### Menghentikan Kontainer:
+```bash
+# Jika menggunakan docker-compose:
+docker compose down
+
+# Jika menggunakan docker CLI standar:
+docker stop mobile_forensic_suite && docker rm mobile_forensic_suite
 ```
 
 ---
