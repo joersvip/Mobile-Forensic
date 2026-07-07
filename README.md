@@ -73,11 +73,31 @@ sudo usermod -aG video $USER
 ```
 
 ### Langkah 4: Kloning & Pemasangan Dependensi
-```bash
-git clone <url-repositori-anda>
-cd <nama-folder-aplikasi>
-npm install
-```
+
+Sejak versi **NPM v9+**, terdapat kebijakan keamanan ketat baru di mana skrip instalasi (*postinstall/install scripts*) dari paket eksternal (seperti modul kompilasi biner asli `sharp`, `@tailwindcss/oxide`, atau `re2`) diblokir sementara sampai disetujui oleh Administrator sistem. Hal ini akan memunculkan peringatan `npm warn allow-scripts`.
+
+Untuk memasang dependensi dengan lancar di Kali Linux, silakan pilih salah satu metode persetujuan di bawah ini:
+
+*   **Opsi A (Rekomendasi - Sekali Jalan)**:
+    Jalankan instalasi dengan bendera instruksi eksplisit agar mengizinkan kompilasi pustaka biner asli secara otomatis:
+    ```bash
+    git clone <url-repositori-anda>
+    cd <nama-folder-aplikasi>
+    npm install --allow-scripts
+    ```
+
+*   **Opsi B (Menyetujui Skrip Tertunda)**:
+    Jika Anda sudah terlanjur menjalankan `npm install` biasa dan mendapatkan daftar peringatan, jalankan perintah persetujuan berikut:
+    ```bash
+    npm approve-scripts --allow-scripts-pending
+    ```
+
+*   **Opsi C (Mengizinkan Skrip Secara Global)**:
+    Konfigurasikan lingkungan NPM di workstation Kali Linux Anda agar selalu memperbolehkan skrip instalasi untuk repositori tepercaya:
+    ```bash
+    npm config set allow-scripts true
+    npm install
+    ```
 
 ### Langkah 5: Menjalankan Aplikasi
 *   **Mode Pengembangan (Development)**:
