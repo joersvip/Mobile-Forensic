@@ -107,13 +107,24 @@ const SIMULATED_DEVICE_TEMPLATES: Omit<ConnectedDevice, 'id'>[] = [
   }
 ];
 
-export default function ConnectedDevicesTab() {
+interface ConnectedDevicesTabProps {
+  devices: ConnectedDevice[];
+  setDevices: React.Dispatch<React.SetStateAction<ConnectedDevice[]>>;
+  selectedDeviceId: string;
+  setSelectedDeviceId: React.Dispatch<React.SetStateAction<string>>;
+  eventLogs: DeviceEventLog[];
+  setEventLogs: React.Dispatch<React.SetStateAction<DeviceEventLog[]>>;
+}
+
+export default function ConnectedDevicesTab({
+  devices,
+  setDevices,
+  selectedDeviceId,
+  setSelectedDeviceId,
+  eventLogs,
+  setEventLogs,
+}: ConnectedDevicesTabProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const [devices, setDevices] = useState<ConnectedDevice[]>(INITIAL_DEVICES);
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
-  
-  // Real-time Event Log entries
-  const [eventLogs, setEventLogs] = useState<DeviceEventLog[]>([]);
 
   // Toast / System notification states
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' | 'warn' } | null>(null);
@@ -130,20 +141,6 @@ export default function ConnectedDevicesTab() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
-
-    if (INITIAL_DEVICES.length > 0) {
-      setSelectedDeviceId(INITIAL_DEVICES[0].id);
-      setEventLogs([
-        {
-          id: 'log_init',
-          timestamp: new Date().toISOString(),
-          deviceName: `${INITIAL_DEVICES[0].manufacturer} ${INITIAL_DEVICES[0].model}`,
-          serialNumber: INITIAL_DEVICES[0].serialNumber || 'N/A',
-          event: 'Device Connected',
-          details: 'Sistem inisialisasi berhasil. Membaca profil perangkat simulasi kasus aktif.'
-        }
-      ]);
-    }
   }, []);
 
   // Display ephemeral notification toast

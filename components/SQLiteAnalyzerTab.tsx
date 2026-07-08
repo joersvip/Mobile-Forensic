@@ -2,17 +2,19 @@
 
 import React, { useState, useMemo } from 'react';
 import { Database, Search, ArrowRight, Download, Terminal, CheckCircle, HelpCircle, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { SmsRecord, ContactRecord, CallRecord } from '../types/forensic';
+import { EvidenceFile, SmsRecord, ContactRecord, CallRecord } from '../types/forensic';
 import { MOCK_SMS, MOCK_CONTACTS, MOCK_CALLS, MOCK_APKS } from '../lib/forensic-data';
 
 interface SQLiteAnalyzerTabProps {
   initialSelectedDb?: string;
   onLogActivity: (module: string, activity: string) => void;
+  evidenceFiles?: EvidenceFile[];
 }
 
 export default function SQLiteAnalyzerTab({
   initialSelectedDb = 'mmssms.db',
-  onLogActivity
+  onLogActivity,
+  evidenceFiles = []
 }: SQLiteAnalyzerTabProps) {
   const [selectedDb, setSelectedDb] = useState<string>(initialSelectedDb);
   const [selectedTable, setSelectedTable] = useState<string>('sms');
@@ -21,9 +23,14 @@ export default function SQLiteAnalyzerTab({
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
+  // Filter uploaded/ingested databases
+  const uploadedDbs = useMemo(() => {
+    return evidenceFiles.filter(f => f.category === 'database');
+  }, [evidenceFiles]);
+
   // List of databases and their schema tables
   const DB_SCHEMAS = useMemo(() => {
-    return {
+    const schemas: any = {
       'mmssms.db': {
         tables: ['sms', 'threads', 'deleted_records'],
         description: 'Android logical SMS provider database. Contains incoming and outgoing text threads.'
@@ -37,7 +44,16 @@ export default function SQLiteAnalyzerTab({
         description: 'Decrypted WhatsApp DB backup recovered from app private sandbox.'
       }
     };
-  }, []);
+
+    uploadedDbs.forEach(db => {
+      schemas[db.name] = {
+        tables: ['carved_ascii', 'metadata', 'hex_header'],
+        description: `Berkas database biner diimpor penyidik dari: ${db.path}. SHA-256: ${db.sha256.substring(0, 16)}...`
+      };
+    });
+
+    return schemas;
+  }, [uploadedDbs]);
 
   // Update table when DB changes
   const handleDbChange = (dbName: string) => {
@@ -51,8 +67,10 @@ export default function SQLiteAnalyzerTab({
       setSqlQuery('SELECT * FROM sms WHERE isDeleted = 0');
     } else if (dbName === 'contacts2.db') {
       setSqlQuery('SELECT * FROM contacts WHERE starred = 1');
-    } else {
+    } else if (dbName === 'whatsapp_history.db') {
       setSqlQuery('SELECT * FROM messages ORDER BY timestamp DESC');
+    } else {
+      setSqlQuery('SELECT * FROM carved_ascii');
     }
     onLogActivity('Database Analyzer', `Loaded database file: "${dbName}"`);
   };
@@ -112,8 +130,45 @@ export default function SQLiteAnalyzerTab({
       }
     }
 
+    // Dynamic mapping for manually ingested databases
+    const customDb = uploadedDbs.find(db => db.name === selectedDb);
+    if (customDb) {
+      if (selectedTable === 'carved_ascii') {
+        if (customDb.content) {
+          // Parse out carved lines of text
+          return customDb.content.split('\n').filter(Boolean).map((line, idx) => ({
+            row_id: idx + 1,
+            carved_sequence: line
+          }));
+        }
+        return [{ row_id: 1, carved_sequence: 'No ASCII text sequences carved yet.' }];
+      }
+      if (selectedTable === 'metadata') {
+        return [
+          { key: 'File Name', value: customDb.name },
+          { key: 'MIME Type', value: customDb.mimeType },
+          { key: 'File Size', value: customDb.size },
+          { key: 'Logical Path', value: customDb.path },
+          { key: 'MD5 Hash', value: customDb.md5 },
+          { key: 'SHA-1 Hash', value: customDb.sha1 },
+          { key: 'SHA-256 Hash', value: customDb.sha256 },
+          { key: 'Modified Time', value: customDb.modifiedTime },
+          { key: 'Ingested Time', value: customDb.accessTime }
+        ];
+      }
+      if (selectedTable === 'hex_header') {
+        const hex = customDb.sha256.substring(0, 32);
+        return [
+          { offset: '0x00000000', hex: hex.substring(0, 8).toUpperCase(), ascii: 'SQLi' },
+          { offset: '0x00000004', hex: hex.substring(8, 16).toUpperCase(), ascii: 'te_f' },
+          { offset: '0x00000008', hex: hex.substring(16, 24).toUpperCase(), ascii: 'orma' },
+          { offset: '0x0000000C', hex: hex.substring(24, 32).toUpperCase(), ascii: 't_3\0' }
+        ];
+      }
+    }
+
     return [];
-  }, [selectedDb, selectedTable]);
+  }, [selectedDb, selectedTable, uploadedDbs]);
 
   // SQL SANDBOX INTERMEDIATE COMPILER
   const { queryResultRows, queryError } = useMemo(() => {
@@ -275,7 +330,7 @@ export default function SQLiteAnalyzerTab({
           <div className="space-y-1">
             <label className="text-[10px] text-zinc-500 uppercase font-bold">Database Tables</label>
             <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
-              {DB_SCHEMAS[selectedDb as keyof typeof DB_SCHEMAS].tables.map(tbl => (
+              {DB_SCHEMAS[selectedDb as keyof typeof DB_SCHEMAS].tables.map((tbl: string) => (
                 <button
                   key={tbl}
                   onClick={() => { setSelectedTable(tbl); setPage(1); }}

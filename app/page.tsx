@@ -9,6 +9,7 @@ import {
 
 // Data and Types
 import { DeviceProfile, EvidenceFile, AuditLog, ForensicSettings, ConnectionStatus, User, SecurityAuditLog } from '../types/forensic';
+import { ConnectedDevice, DeviceEventLog } from '../types/device';
 import { MOCK_DEVICES, MOCK_FILES } from '../lib/forensic-data';
 
 // Tabs Components
@@ -61,9 +62,79 @@ export default function ForensicPage() {
     }
     return null;
   });
-  const [evidenceFiles, setEvidenceFiles] = useState<EvidenceFile[]>(MOCK_FILES);
+  const [evidenceFiles, setEvidenceFiles] = useState<EvidenceFile[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('forensic_evidence_files');
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { console.error(e); }
+      }
+    }
+    return MOCK_FILES;
+  });
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [initialSelectedDb, setInitialSelectedDb] = useState<string>('mmssms.db');
+
+  // Lifted Devices State for persistent and shared tracking
+  const [devices, setDevices] = useState<ConnectedDevice[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('forensic_connected_devices');
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { console.error(e); }
+      }
+      const isSimActive = localStorage.getItem('forensic_sim_mode') === 'active';
+      if (isSimActive) {
+        return [{
+          id: 'samsung_s24',
+          manufacturer: 'SAMSUNG',
+          model: 'Galaxy S24 Ultra',
+          productName: 'SM-S928B',
+          androidVersion: '14.0 (One UI 6.1)',
+          serialNumber: 'R5CW30X8Y9Z',
+          usbMode: 'ADB',
+          connectionStatus: 'CONNECTED',
+          usbDebugging: 'ENABLED',
+          rootStatus: 'NOT_ROOTED',
+          batteryLevel: 88,
+          storageTotalGb: 512,
+          storageUsedGb: 194,
+          connectionType: 'USB 3.2 Type-C (HighSpeed)',
+          lastSeen: 'Real-time'
+        }];
+      }
+    }
+    return [];
+  });
+
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('forensic_selected_device_id');
+      if (saved) return saved;
+      const isSimActive = localStorage.getItem('forensic_sim_mode') === 'active';
+      if (isSimActive) return 'samsung_s24';
+    }
+    return '';
+  });
+
+  const [eventLogs, setEventLogs] = useState<DeviceEventLog[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('forensic_device_event_logs');
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { console.error(e); }
+      }
+      const isSimActive = localStorage.getItem('forensic_sim_mode') === 'active';
+      if (isSimActive) {
+        return [{
+          id: 'log_init',
+          timestamp: new Date().toISOString(),
+          deviceName: 'SAMSUNG Galaxy S24 Ultra',
+          serialNumber: 'R5CW30X8Y9Z',
+          event: 'Device Connected',
+          details: 'Sistem inisialisasi berhasil. Membaca profil perangkat simulasi kasus aktif.'
+        }];
+      }
+    }
+    return [];
+  });
 
   // Command Palette & Floating Panels States
   const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
@@ -138,6 +209,79 @@ export default function ForensicPage() {
     }, 3000);
     return () => clearInterval(timer);
   }, []);
+
+  // Write lifted states to localStorage for persistent session survival
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('forensic_connected_devices', JSON.stringify(devices));
+    }
+  }, [devices]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('forensic_selected_device_id', selectedDeviceId);
+    }
+  }, [selectedDeviceId]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('forensic_device_event_logs', JSON.stringify(eventLogs));
+    }
+  }, [eventLogs]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('forensic_evidence_files', JSON.stringify(evidenceFiles));
+    }
+  }, [evidenceFiles]);
+
+  // Synchronize active device selection with page-level global selectedDevice and status
+  useEffect(() => {
+    if (selectedDeviceId) {
+      const found = devices.find(d => d.id === selectedDeviceId);
+      if (found) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setSelectedDevice({
+          id: found.id,
+          brand: found.manufacturer,
+          model: found.model,
+          product: found.productName || 'Unknown Product',
+          androidVersion: found.androidVersion || 'Unknown Android',
+          buildNumber: 'QP1A.190711.020',
+          kernel: '4.19.110-perf-g921b7a',
+          abi: 'arm64-v8a',
+          cpu: 'Octa-core Max 3.2GHz',
+          ram: '12 GB LPDDR5X',
+          internalStorage: `${found.storageTotalGb || 256} GB`,
+          externalStorage: 'Not mounted',
+          battery: `${found.batteryLevel || 100}%`,
+          androidId: found.serialNumber || 'N/A',
+          imei: '358291048291038',
+          imsi: '510103928102938',
+          iccid: '896210293810293810F',
+          securityPatch: '2026-05-01',
+          selinuxStatus: 'Enforcing',
+          encryptionStatus: 'Encrypted (FBE)',
+          bootloader: 'Locked',
+          usbDebugging: found.usbDebugging || 'ENABLED',
+          rootStatus: found.rootStatus || 'NOT_ROOTED',
+        });
+        if (status !== 'ACQUIRED' && status !== 'CONNECTED') {
+          setStatus('CONNECTED');
+        }
+      } else {
+        setSelectedDevice(null);
+        setStatus('DISCONNECTED');
+      }
+    } else {
+      if (devices.length > 0) {
+        setSelectedDeviceId(devices[0].id);
+      } else {
+        setSelectedDevice(null);
+        setStatus('DISCONNECTED');
+      }
+    }
+  }, [selectedDeviceId, devices, status]);
 
   // Global hotkeys (Ctrl + P) to open Command Palette
   useEffect(() => {
@@ -220,15 +364,41 @@ export default function ForensicPage() {
   };
 
   const handleConnect = () => {
-    setStatus('CONNECTED');
-    setSelectedDevice(MOCK_DEVICES[0]);
-    handleLogActivity('ADB Handshake', `Established daemon link with: ${MOCK_DEVICES[0].model}`);
-    triggerToast(`Koneksi perangkat terdeteksi: ${MOCK_DEVICES[0].model}`);
+    const defaultSimDevice: ConnectedDevice = {
+      id: 'samsung_s24',
+      manufacturer: 'SAMSUNG',
+      model: 'Galaxy S24 Ultra',
+      productName: 'SM-S928B',
+      androidVersion: '14.0 (One UI 6.1)',
+      serialNumber: 'R5CW30X8Y9Z',
+      usbMode: 'ADB',
+      connectionStatus: 'CONNECTED',
+      usbDebugging: 'ENABLED',
+      rootStatus: 'NOT_ROOTED',
+      batteryLevel: 88,
+      storageTotalGb: 512,
+      storageUsedGb: 194,
+      connectionType: 'USB 3.2 Type-C (HighSpeed)',
+      lastSeen: 'Real-time'
+    };
+
+    setDevices(prev => {
+      if (prev.some(d => d.id === 'samsung_s24')) return prev;
+      return [...prev, defaultSimDevice];
+    });
+    setSelectedDeviceId('samsung_s24');
+    handleLogActivity('ADB Handshake', 'Established daemon link with: SAMSUNG Galaxy S24 Ultra');
+    triggerToast('Koneksi perangkat terdeteksi: SAMSUNG Galaxy S24 Ultra');
   };
 
   const handleDisconnect = () => {
-    setStatus('DISCONNECTED');
-    setSelectedDevice(null);
+    if (selectedDeviceId) {
+      setDevices(prev => prev.filter(d => d.id !== selectedDeviceId));
+      setSelectedDeviceId('');
+    } else {
+      setDevices([]);
+      setSelectedDeviceId('');
+    }
     handleLogActivity('ADB Handshake', 'ADB link terminated by investigator.');
     triggerToast('Koneksi perangkat terputus.');
   };
@@ -237,6 +407,93 @@ export default function ForensicPage() {
     setStatus('ACQUIRED');
     handleLogActivity('Acquisition Engine', 'Saved completed logical file block targets to filesystem case folder.');
     triggerToast('Akusisi Logis Berhasil Diselesaikan!');
+
+    // Dynamically generate real-looking forensic files for the acquired device!
+    if (selectedDevice) {
+      const generatedFiles: EvidenceFile[] = [
+        {
+          id: `db_sms_${Date.now()}`,
+          name: 'mmssms.db',
+          path: `/data/data/com.android.providers.telephony/databases/mmssms.db`,
+          size: '1.4 MB',
+          sizeBytes: 1468006,
+          category: 'database',
+          md5: '9b8a7c6d5e4f3a2b1c0d9e8f7a6b5c4d',
+          sha1: 'fedcba9876543210fedcba9876543210fedcba98',
+          sha256: '4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b',
+          sha512: '8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a',
+          mimeType: 'application/x-sqlite3',
+          createdTime: new Date().toISOString(),
+          modifiedTime: new Date().toISOString(),
+          accessTime: new Date().toISOString(),
+          content: `[SQLite mmssms.db Metadata]\nTarget Device: ${selectedDevice.brand} ${selectedDevice.model}\nSerial Number: ${selectedDevice.androidId}\nType: Android SMS Provider database`
+        },
+        {
+          id: `db_contacts_${Date.now()}`,
+          name: 'contacts2.db',
+          path: `/data/data/com.android.providers.contacts/databases/contacts2.db`,
+          size: '2.1 MB',
+          sizeBytes: 2202009,
+          category: 'database',
+          md5: '1234567890abcdef1234567890abcdef',
+          sha1: '90abcdef90abcdef90abcdef90abcdef90abcdef',
+          sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+          sha512: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+          mimeType: 'application/x-sqlite3',
+          createdTime: new Date().toISOString(),
+          modifiedTime: new Date().toISOString(),
+          accessTime: new Date().toISOString(),
+          content: `[SQLite contacts2.db Metadata]\nTarget Device: ${selectedDevice.brand} ${selectedDevice.model}\nType: Android Contacts database`
+        },
+        {
+          id: `pic_camera_${Date.now()}`,
+          name: 'evidence_snapshot_1.jpg',
+          path: `/sdcard/DCIM/Camera/evidence_snapshot_1.jpg`,
+          size: '340 KB',
+          sizeBytes: 348160,
+          category: 'picture',
+          md5: 'a9b8c7d6e5f43210123456789abcdef0',
+          sha1: '1234567890abcdef1234567890abcdef12345678',
+          sha256: '9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b',
+          sha512: '9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b',
+          mimeType: 'image/jpeg',
+          createdTime: new Date().toISOString(),
+          modifiedTime: new Date().toISOString(),
+          accessTime: new Date().toISOString(),
+          exif: {
+            camera: `${selectedDevice.brand} ${selectedDevice.model}`,
+            lens: 'Built-in Camera Lens',
+            dateTaken: new Date().toISOString().replace('T', ' ').substring(0, 19),
+            gps: '-6.2088, 106.8456',
+            orientation: 'Horizontal',
+            resolution: '4032 x 3024 (12 MP)'
+          }
+        },
+        {
+          id: `doc_case_${Date.now()}`,
+          name: 'dump_report.txt',
+          path: `/sdcard/Documents/dump_report.txt`,
+          size: '0.8 KB',
+          sizeBytes: 850,
+          category: 'document',
+          md5: 'cf56184c7d659a2feaa0c55ad015a3bf',
+          sha1: 'b934ca495991b7852b855f2d4e081884c7d659a2',
+          sha256: 'f2d4e081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
+          sha512: 'f2d4e081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08f2d4e081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
+          mimeType: 'text/plain',
+          createdTime: new Date().toISOString(),
+          modifiedTime: new Date().toISOString(),
+          accessTime: new Date().toISOString(),
+          content: `FORENSIC INVESTIGATION REPORT NOTES\nTarget Device: ${selectedDevice.brand} ${selectedDevice.model}\nSerial Number: ${selectedDevice.androidId}\nAcquisition Time: ${new Date().toLocaleString()}\nStatus: Acquired logically via ADB debugging interface.`
+        }
+      ];
+
+      setEvidenceFiles(prev => {
+        // Filter out any previous dynamically generated files to prevent duplicates
+        const withoutGenerated = prev.filter(p => !p.id.startsWith('db_') && !p.id.startsWith('pic_') && !p.id.startsWith('doc_'));
+        return [...withoutGenerated, ...generatedFiles];
+      });
+    }
   };
 
   const handleAnalyzeDatabase = (dbName: string) => {
@@ -702,7 +959,14 @@ export default function ForensicPage() {
             )}
 
             {activeTab === 'devices' && (
-              <ConnectedDevicesTab />
+              <ConnectedDevicesTab 
+                devices={devices}
+                setDevices={setDevices}
+                selectedDeviceId={selectedDeviceId}
+                setSelectedDeviceId={setSelectedDeviceId}
+                eventLogs={eventLogs}
+                setEventLogs={setEventLogs}
+              />
             )}
 
             {activeTab === 'ai_analysis' && (
@@ -715,6 +979,7 @@ export default function ForensicPage() {
                 status={status}
                 onAnalyzeDatabase={handleAnalyzeDatabase}
                 onLogActivity={handleLogActivity}
+                onIngestFiles={(newFiles) => setEvidenceFiles(prev => [...prev, ...newFiles])}
               />
             )}
 
@@ -722,6 +987,7 @@ export default function ForensicPage() {
               <SQLiteAnalyzerTab
                 initialSelectedDb={initialSelectedDb}
                 onLogActivity={handleLogActivity}
+                evidenceFiles={evidenceFiles}
               />
             )}
 
